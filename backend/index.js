@@ -26,7 +26,7 @@ mongoose
 // Middleware
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5173","https://role-based-student-management-system-rvzi.onrender.com"],
     methods: ["GET", "POST", "DELETE", "PUT","PATCH"],
     allowedHeaders: [
       "Content-Type",

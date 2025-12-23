@@ -4,7 +4,7 @@ import { User } from "../models/user.model.js";
 
 //register
 const registerUser = async (req, res) => {
-  const { name, email, password,course } = req.body;
+  const { name, email, password, course } = req.body;
 
   try {
     const checkUser = await User.findOne({ email });
@@ -19,8 +19,8 @@ const registerUser = async (req, res) => {
       name,
       email,
       password: hashPassword,
-      role : "student",
-      course
+      role: "student",
+      course,
     });
 
     await newUser.save();
@@ -70,16 +70,23 @@ const loginUser = async (req, res) => {
       { expiresIn: "60m" }
     );
 
-    res.cookie("token", token, { httpOnly: true, secure: false }).json({
-      success: true,
-      message: "Logged in successfully",
-      user: {
-        email: checkUser.email,
-        role: checkUser.role,
-        id: checkUser._id,
-        name: checkUser.name,
-      },
-    });
+    res
+      .cookie("token", token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "none",
+        path: "/",
+      })
+      .json({
+        success: true,
+        message: "Logged in successfully",
+        user: {
+          email: checkUser.email,
+          role: checkUser.role,
+          id: checkUser._id,
+          name: checkUser.name,
+        },
+      });
   } catch (e) {
     console.log(e);
     res.status(500).json({
