@@ -5,13 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { logoutUser } from "@/store/auth-slice";
 import { updateStudentDataAsId, getAllStudentData } from "@/store/admin-slice";
+import { useSnackbar } from 'notistack';
 
 export default function EditStudent({ student }) {
   console.log("852", student._id);
 
   const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
   const { isLoading } = useSelector((state) => state.admin);
 
   const [formData, setFormData] = useState({
@@ -19,22 +20,6 @@ export default function EditStudent({ student }) {
     email: student.email || "",
     course: student.course || "",
   });
-
-  // Fetch student profile
-  //   useEffect(() => {
-  //     dispatch(getStudentData());
-  //   }, [dispatch]);
-
-  // Populate form when data arrives
-  //   useEffect(() => {
-  //     if (studentData) {
-  //       setFormData({
-  //         name: studentData.name || "",
-  //         email: studentData.email || "",
-  //         course: studentData.course || "",
-  //       });
-  //     }
-  //   }, [studentData]);
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -49,17 +34,16 @@ export default function EditStudent({ student }) {
       })
     ).then(() => {
       dispatch(getAllStudentData());
+      enqueueSnackbar("Student updated successfully", { variant: 'success' });
+    }).catch(() => {
+      enqueueSnackbar("Failed to update student", { variant: 'error' });
     });
 
-    // console.log("852",id);
   }
 
-  function handleLogout() {
-    dispatch(logoutUser());
-  }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 flex justify-center">
+    <div className="max-h-screen bg-gray-50 p-6 flex justify-center">
       <Card className="w-full max-w-xl shadow-md">
         <CardHeader>
           <CardTitle className="text-xl">Student Dashboard</CardTitle>
@@ -105,9 +89,6 @@ export default function EditStudent({ student }) {
             {" "}
             <Button onClick={handleUpdate} disabled={isLoading}>
               {isLoading ? "Updating..." : "Update Profile"}
-            </Button>
-            <Button onClick={handleLogout} disabled={isLoading}>
-              logout
             </Button>
           </div>
         </CardContent>

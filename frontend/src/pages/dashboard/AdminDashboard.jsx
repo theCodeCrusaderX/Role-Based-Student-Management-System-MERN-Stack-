@@ -4,6 +4,19 @@ import { deleteStudent, getAllStudentData } from "@/store/admin-slice";
 import { logoutUser, registerUser } from "@/store/auth-slice";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSnackbar } from 'notistack';
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 import {
   Table,
@@ -22,6 +35,7 @@ import EditStudent from "@/components/EditStudent";
 
 function AdminDashboard() {
   const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
   const { studentData, isLoading } = useSelector((state) => state.admin);
 
   useEffect(() => {
@@ -34,30 +48,46 @@ function AdminDashboard() {
         console.log(res);
 
         if (res?.payload?.success) {
-          alert("user registered");
+          enqueueSnackbar("Student registered successfully", { variant: 'success' });
           // dispatch(getAllStudentData()); // Refresh the student list
         } else {
-          alert("error");
+          enqueueSnackbar("Registration failed", { variant: 'error' });
         }
       })
       .catch((err) => {
         console.error("Error during registration:", err);
-        alert("error");
+        enqueueSnackbar("An error occurred during registration", { variant: 'error' });
       });
   }
 
   function handleDeleteStudent(studentId) {
     console.log(studentId);
 
-    dispatch(deleteStudent(studentId)).then(dispatch(getAllStudentData()));
+    dispatch(deleteStudent(studentId))
+      .then(() => {
+        dispatch(getAllStudentData());
+        enqueueSnackbar("Student deleted successfully", { variant: 'success' });
+      })
+      .catch(() => {
+        enqueueSnackbar("Failed to delete student", { variant: 'error' });
+      });
   }
 
   function handleLogoutAdmin() {
-    dispatch(logoutUser())
+    dispatch(logoutUser()).then(() => {
+      enqueueSnackbar("Admin logged out successfully", { variant: 'success' });
+    });
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div
+      className="min-h-screen bg-gray-50 p-6"
+      style={{
+        backgroundColor: "#a60071",
+        backgroundImage:
+          'url("https://www.transparenttextures.com/patterns/cubes.png")',
+      }}
+    >
       <Button onClick={handleLogoutAdmin}>logout</Button>
       <Card className="max-w-6xl mx-auto shadow-md">
         <CardHeader className="flex flex-row items-center justify-between">
@@ -110,13 +140,29 @@ function AdminDashboard() {
                             <EditStudent student={student} />
                           </DialogContent>
                         </Dialog>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleDeleteStudent(student._id)}
-                        >
-                          Delete
-                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="destructive">
+                              Delete
+                            </Button>
+                          </AlertDialogTrigger>
+
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Are you sure you want to delete this student?
+                              </AlertDialogTitle>
+                            </AlertDialogHeader>
+
+                            <div className="flex justify-end gap-3 mt-4">
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeleteStudent(student._id)}>
+                                Yes, Delete
+                              </AlertDialogAction>
+                            </div>
+                          </AlertDialogContent>
+                        </AlertDialog>
+
                       </TableCell>
                     </TableRow>
                   ))

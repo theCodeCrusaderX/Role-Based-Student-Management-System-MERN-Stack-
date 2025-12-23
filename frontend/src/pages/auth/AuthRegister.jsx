@@ -6,11 +6,13 @@ import { useDispatch } from "react-redux";
 import { registerUser } from "@/store/auth-slice";
 // import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSnackbar } from 'notistack';
 
 export default function App() {
   // const { register, handleSubmit } = useForm();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
   // const { toast } = useToast();
 
   function handleRegisterUser(data) {
@@ -22,15 +24,15 @@ export default function App() {
 
         if (res?.payload?.success) {
 
-          alert("user registered");
+          enqueueSnackbar("User registered successfully", { variant: 'success' });
           navigate("/auth/login");
         } else {
-          alert("error")
+          enqueueSnackbar("Registration failed", { variant: 'error' });
         }
       })
       .catch((err) => {
         console.error("Error during registration:", err);
-        alert("error")
+        enqueueSnackbar("An error occurred during registration", { variant: 'error' });
       });
   }
 

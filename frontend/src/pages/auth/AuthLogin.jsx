@@ -4,9 +4,11 @@ import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loginUser } from "@/store/auth-slice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSnackbar } from 'notistack';
 
 export default function App() {
   const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
 
   function handleLoginUser(data) {
     dispatch(loginUser(data))
@@ -14,14 +16,14 @@ export default function App() {
         console.log("res :: ", res);
 
         if (res.meta.requestStatus === "fulfilled") {
-          alert("logged in");
+          enqueueSnackbar("Logged in successfully", { variant: 'success' });
         } else {
-          alert("error");
+          enqueueSnackbar("Login failed", { variant: 'error' });
         }
       })
       .catch((err) => {
         console.error("Error during login:", err);
-        alert("error");
+        enqueueSnackbar("An error occurred during login", { variant: 'error' });
       });
   }
 

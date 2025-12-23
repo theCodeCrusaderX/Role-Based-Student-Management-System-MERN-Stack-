@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { logoutUser } from "@/store/auth-slice";
+import { useSnackbar } from 'notistack';
 
 export default function StudentDashboard() {
   const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
   const { studentData, isLoading } = useSelector(
     (state) => state.student
   );
@@ -42,15 +44,30 @@ export default function StudentDashboard() {
   }
 
   function handleUpdate() {
-    dispatch(updateStudentData(formData));
+    dispatch(updateStudentData(formData))
+      .then(() => {
+        enqueueSnackbar("Profile updated successfully", { variant: 'success' });
+      })
+      .catch(() => {
+        enqueueSnackbar("Failed to update profile", { variant: 'error' });
+      });
   }
 
   function handleLogout() {
-    dispatch(logoutUser())
+    dispatch(logoutUser()).then(() => {
+      enqueueSnackbar("Logged out successfully", { variant: 'success' });
+    });
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 flex justify-center">
+    <div
+      className="min-h-screen p-6 flex justify-center"
+      style={{
+        backgroundImage: 'url("https://www.transparenttextures.com/patterns/arabesque.png")',
+        backgroundColor: '#338c00'
+
+      }}
+    >
       <Card className="w-full max-w-xl shadow-md">
         <CardHeader>
           <CardTitle className="text-xl">Student Dashboard</CardTitle>
