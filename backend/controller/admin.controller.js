@@ -1,13 +1,48 @@
 import { User } from "../models/user.model.js";
 
-const getAllStudentProfile = async (req, res) => {
+// const getAllStudentProfile = async (req, res) => {
     
-  const user = await User.find({role : "student"}).select("-password");
-  res.status(200).json({
-      success: true,
-      user,
+//   const user = await User.find({role : "student"}).select("-password");
+//   res.status(200).json({
+//       success: true,
+//       user,
+//     });
+// };
+
+const getAllStudentProfile = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const skip = (page - 1) * limit;
+
+    const totalStudents = await User.countDocuments({
+      role: "student",
     });
+
+    const students = await User.find({ role: "student" })
+      .select("-password")
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      students,
+      pagination: {
+        totalStudents,
+        currentPage: page,
+        totalPages: Math.ceil(totalStudents / limit),
+        limit,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch students",
+    });
+  }
 };
+
 
 const updateStudentProfile = async (req, res) => {
 

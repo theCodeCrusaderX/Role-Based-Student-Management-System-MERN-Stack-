@@ -4,7 +4,7 @@ import { getAllStudentProfile,updateStudentProfile,deleteStudentProfile } from "
 
 const router = Router();
 
-router.route("/get/all").get(getAllStudentProfile);
+router.route("/students").get(getAllStudentProfile);
 router.route("/student-data/update/:studentId").patch(updateStudentProfile);
 router.route("/student-data/delete/:studentId").delete(deleteStudentProfile)
 

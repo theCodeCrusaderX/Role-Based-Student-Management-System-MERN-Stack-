@@ -1,10 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteStudent, getAllStudentData } from "@/store/admin-slice";
 import { logoutUser, registerUser } from "@/store/auth-slice";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useSnackbar } from 'notistack';
+import { useSnackbar } from "notistack";
 
 import {
   AlertDialog,
@@ -16,7 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 
 import {
   Table,
@@ -36,11 +36,14 @@ import EditStudent from "@/components/EditStudent";
 function AdminDashboard() {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { studentData, isLoading } = useSelector((state) => state.admin);
+  const { studentData,pagination, isLoading } = useSelector((state) => state.admin);
+
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(5);
 
   useEffect(() => {
-    dispatch(getAllStudentData());
-  }, [dispatch]);
+    dispatch(getAllStudentData({ page, limit }));
+  }, [dispatch, page, limit]);
 
   function registerStudent(data) {
     dispatch(registerUser(data))
@@ -48,34 +51,42 @@ function AdminDashboard() {
         console.log(res);
 
         if (res?.payload?.success) {
-          enqueueSnackbar("Student registered successfully", { variant: 'success' });
-          // dispatch(getAllStudentData()); // Refresh the student list
+          enqueueSnackbar("Student registered successfully", {
+            variant: "success",
+          });
+          dispatch(getAllStudentData({ page, limit })); // Refresh the student list
         } else {
-          enqueueSnackbar("Registration failed", { variant: 'error' });
+          enqueueSnackbar("Registration failed", { variant: "error" });
         }
       })
       .catch((err) => {
         console.error("Error during registration:", err);
-        enqueueSnackbar("An error occurred during registration", { variant: 'error' });
+        enqueueSnackbar("An error occurred during registration", {
+          variant: "error",
+        });
       });
   }
+
+  useEffect(() => {
+    dispatch(getAllStudentData({ page, limit }));
+  }, [dispatch, page,limit]);
 
   function handleDeleteStudent(studentId) {
     console.log(studentId);
 
     dispatch(deleteStudent(studentId))
       .then(() => {
-        dispatch(getAllStudentData());
-        enqueueSnackbar("Student deleted successfully", { variant: 'success' });
+        dispatch(getAllStudentData({ page, limit }));
+        enqueueSnackbar("Student deleted successfully", { variant: "success" });
       })
       .catch(() => {
-        enqueueSnackbar("Failed to delete student", { variant: 'error' });
+        enqueueSnackbar("Failed to delete student", { variant: "error" });
       });
   }
 
   function handleLogoutAdmin() {
     dispatch(logoutUser()).then(() => {
-      enqueueSnackbar("Admin logged out successfully", { variant: 'success' });
+      enqueueSnackbar("Admin logged out successfully", { variant: "success" });
     });
   }
 
@@ -137,7 +148,7 @@ function AdminDashboard() {
                           </DialogTrigger>
 
                           <DialogContent>
-                            <EditStudent student={student} />
+                            <EditStudent student={student} page={page} limit={limit} />
                           </DialogContent>
                         </Dialog>
                         <AlertDialog>
@@ -156,13 +167,14 @@ function AdminDashboard() {
 
                             <div className="flex justify-end gap-3 mt-4">
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteStudent(student._id)}>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteStudent(student._id)}
+                              >
                                 Yes, Delete
                               </AlertDialogAction>
                             </div>
                           </AlertDialogContent>
                         </AlertDialog>
-
                       </TableCell>
                     </TableRow>
                   ))
@@ -176,7 +188,32 @@ function AdminDashboard() {
               </TableBody>
             </Table>
           )}
+          {/* PAGINATION */}
+          <div className="flex justify-between items-center mt-4">
+            <p className="text-sm text-gray-600">
+              Page {pagination?.currentPage} of {pagination?.totalPages}
+            </p>
+
+            <div className="space-x-2">
+              <Button
+                variant="outline"
+                disabled={page === 1}
+                onClick={() => setPage((p) => p - 1)}
+              >
+                Previous
+              </Button>
+
+              <Button
+                variant="outline"
+                disabled={page === pagination?.totalPages}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
         </CardContent>
+        {/* PAGINATION */}
       </Card>
     </div>
   );

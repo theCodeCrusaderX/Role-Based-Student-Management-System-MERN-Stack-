@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { updateStudentDataAsId, getAllStudentData } from "@/store/admin-slice";
 import { useSnackbar } from 'notistack';
 
-export default function EditStudent({ student }) {
+export default function EditStudent({ student, page, limit }) {
   console.log("852", student._id);
 
   const dispatch = useDispatch();
@@ -33,7 +33,7 @@ export default function EditStudent({ student }) {
         data: formData,
       })
     ).then(() => {
-      dispatch(getAllStudentData());
+      dispatch(getAllStudentData({ page, limit }))
       enqueueSnackbar("Student updated successfully", { variant: 'success' });
     }).catch(() => {
       enqueueSnackbar("Failed to update student", { variant: 'error' });

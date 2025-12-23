@@ -5,11 +5,16 @@ import URL from "../../constants";
 //global initial state
 const initialState = {
   studentData: null,
+  pagination: {
+      currentPage: 1,
+      totalPages: 1,
+      limit: 5,
+    },
   isLoading: true,
 };
 
-export const getAllStudentData = createAsyncThunk("/admin/data", async () => {
-  const response = await axios.get(`${URL}api/v1/admin/get/all`, {
+export const getAllStudentData = createAsyncThunk("/admin/data", async ({ page, limit }) => {
+  const response = await axios.get(`${URL}api/v1/admin/students?page=${page}&limit=${limit}`, {
     withCredentials: true,
     headers: {
       "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
@@ -66,7 +71,8 @@ const adminSlice = createSlice({
       })
       .addCase(getAllStudentData.fulfilled, (state, action) => {
         (state.isLoading = false),
-          (state.studentData = action.payload.success && action.payload.user);
+          (state.studentData = action.payload.students);
+          state.pagination = action.payload.pagination;
       })
       .addCase(updateStudentDataAsId.pending, (state) => {
         state.isLoading = true;
