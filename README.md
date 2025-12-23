@@ -167,6 +167,12 @@ npm install
 npm run dev
 ```
 
+### Demo Credentials
+- **Admin Login**
+- **email**: `admin@gmail.com`
+- **password**:`123`
+- Register new students or use existing ones for testing
+
 ---
 
 ## 🌱 Environment Variables
